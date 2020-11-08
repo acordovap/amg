@@ -39,33 +39,29 @@ class SongAgent(Agent):
 
 class SongBehaviour(FSMBehaviour):
     async def on_start(self):
-        self.agent.set("current_bar_no", 0)
-        self.agent.set("tempo", 120)
-        self.agent.set("key", "C")
+        self.agent.set("current_bar_no", 0) # inicializa "current_bar_no" en 0
+        # self.agent.set("tempo", 120)
+        # self.agent.set("key", "C")
         self.agent.set("melody_track", Track())
         self.agent.set("accompaniment_track", Track())
         self.agent.set("current_melody_bar", Bar(CFG.SONG_KEY_SIGNATURE, CFG.SONG_TIME_SIGNATURE))
-        self.agent.set("current_accompaniment_bar", Bar())
+        self.agent.set("current_accompaniment_bar", Bar(CFG.SONG_KEY_SIGNATURE, CFG.SONG_TIME_SIGNATURE))
 
 class SReceiveChordState(State):
     async def run(self):
         cbn = self.agent.get("current_bar_no")
-        if cbn < CFG.SONG_LENGTH: # falta sacar con modulo
+        if cbn < CFG.SONG_LENGTH: # falta sacar con modulo, de momento es un acorde por barra
             msg = await self.receive()
             if msg:
                 if self.agent.get("chords_template").match(msg):
                     if chords.determine_triad(getattr(chords, CFG.PROGRESSIONS[cbn])(CFG.SONG_KEY_SIGNATURE), True) == chords.determine_triad(msg.body.split(','), True):
                         cab = self.agent.get("current_accompaniment_bar")
-                        #cab = Bar()
-                        cab.place_notes(msg.body.split(','), 1) # poner tiempo variable
-                        #if cab.current_beat == cab.length: # pasar a self.set_next_state(S_RECEIVE_NOTE)
+                        cab.place_notes(msg.body.split(','), 1) # de momento es un acorde por barra
                         at = self.agent.get("accompaniment_track")
                         at.add_bar(cab)
-                        self.agent.set("current_accompaniment_bar", Bar())
+                        self.agent.set("current_accompaniment_bar", Bar(CFG.SONG_KEY_SIGNATURE, CFG.SONG_TIME_SIGNATURE))
                         self.agent.set("accompaniment_track", at)
                         self.set_next_state(S_RECEIVE_NOTE)
-                        #else:
-                            #print("seguir aqui")
                     else:
                         self.set_next_state(S_RECEIVE_CHORD) # Continúa en el mismo estado
             else:
@@ -80,12 +76,13 @@ class SReceiveNoteState(State):
             if self.agent.get("notes_template").match(msg):
                 if Note(msg.body).name in getattr(chords, CFG.PROGRESSIONS[cbn])(CFG.SONG_KEY_SIGNATURE):
                     cmb = self.agent.get("current_melody_bar")
-                    cmb.place_notes(msg.body, 4)
-                    if cmb.current_beat == cmb.length: #chechar si llena, entonces agregar a track y todo lo demas
+                    # checar si va a caber con el tamaño, puede ser en el if de arriba?
+                    cmb.place_notes(msg.body, 4) # de momento 4 notas por barra
+                    if cmb.current_beat == cmb.length: # chechar si llena, entonces agregar a melody_track
                         mt = self.agent.get("melody_track")
                         mt.add_bar(cmb)
                         self.agent.set("melody_track", mt)
-                        self.agent.set("current_melody_bar", Bar())
+                        self.agent.set("current_melody_bar", Bar(CFG.SONG_KEY_SIGNATURE, CFG.SONG_TIME_SIGNATURE))
                         self.agent.set("current_bar_no", cbn+1)
                         self.set_next_state(S_RECEIVE_CHORD)
                     else:
@@ -110,4 +107,5 @@ class SPublishSongState(State):
         # fluidsynth.play_Composition(c)
         midi_file_out.write_Composition("amg_composition.mid", c, CFG.SONG_TEMPO)
         l = lilypond.from_Composition(c)
+        # print(l)
         lilypond.to_pdf(l, "amg_composition")
