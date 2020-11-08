@@ -13,7 +13,7 @@ class Setup_NoteValues(Agent):
 
     class Behav1(OneShotBehaviour):
         def on_available(self, peer_jid, stanza):
-            print("[{}] My friend {} is now available with show {}".format(self.agent.name, peer_jid, stanza.show))
+            print("[{}] My friend {} is now available with show {}".format(self.agent.name, peer_jid.split("@")[0], stanza.show))
 
         async def run(self):
             self.presence.on_available =  self.on_available
