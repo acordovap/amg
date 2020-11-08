@@ -28,13 +28,12 @@ class RawNote(Agent):
 
     class sendFullNote(CyclicBehaviour):
         async def run(self):
+            #falta poner que este disponible los agente song
             fn = self.agent.get("full_note")
-            #falta poner que este disponible el agente song
             if fn[1] != None and fn[2] != None:
                 msg = Message(to="receiver"+CFG.XMPP_SERVER)   # Instantiate the message
                 msg.set_metadata("performative", "notes")   # Set the "notes" FIPA performative
                 msg.body = fn[0]+"-"+str(fn[1])+","+str(fn[2])   # Set the message content
-                print(msg.body)
                 #await self.send(msg)
                 await asyncio.sleep(random.randint(1, 10)/1000)
 

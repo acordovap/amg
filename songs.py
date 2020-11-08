@@ -10,7 +10,7 @@ from mingus.containers import NoteContainer
 from mingus.containers import Bar
 from mingus.containers import Track
 from mingus.containers import Composition
-from mingus.midi import fluidsynth
+#from mingus.midi import fluidsynth
 from mingus.extra import lilypond
 from mingus.midi import midi_file_out
 
@@ -55,6 +55,7 @@ class SReceiveChordState(State):
             if msg:
                 if self.agent.get("chords_template").match(msg):
                     if chords.determine_triad(getattr(chords, CFG.PROGRESSIONS[cbn])(CFG.SONG_KEY_SIGNATURE), True) == chords.determine_triad(msg.body.split(','), True):
+                        print("received: " + msg.body)
                         cab = self.agent.get("current_accompaniment_bar")
                         cab.place_notes(msg.body.split(','), 1) # de momento es un acorde por barra
                         at = self.agent.get("accompaniment_track")
@@ -68,6 +69,7 @@ class SReceiveChordState(State):
                 self.set_next_state(S_RECEIVE_CHORD) # Continúa en el mismo estado
         else:
             self.set_next_state(S_PUBLISH_SONG)
+
 class SReceiveNoteState(State):
     async def run(self):
         cbn = self.agent.get("current_bar_no")
