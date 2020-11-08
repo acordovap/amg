@@ -88,7 +88,7 @@ if __name__ == "__main__":
         jid1 = "s_" + str(i) + CFG.XMPP_SERVER
         passwd1 = "."
         a1 = Setup_Songs(jid1, passwd1)
-        a1.start()
+        a1.start().result()
 
     # Chord
     for i in CFG.all_notes:
@@ -96,28 +96,28 @@ if __name__ == "__main__":
             jid1 = "c_" + str(i) + "_" + str(j) + CFG.XMPP_SERVER
             passwd1 = "."
             a1 = Setup_Chords(jid1, passwd1)
-            a1.start()
+            a1.start().result()
 
     # RawNote
     for i in CFG.all_notes: # falta subscripcion a song
         jid1 = "n_" + str(i) + CFG.XMPP_SERVER
         passwd1 = "."
         a1 = Setup_RawNotes(jid1, passwd1)
-        a1.start()
+        a1.start().result()
 
     #NoteValue
     for i in CFG.all_note_values:
         jid1 = "nv_" + str(i) + CFG.XMPP_SERVER
         passwd1 = "."
         a1 = Setup_NoteValues(jid1, passwd1)
-        a1.start()
+        a1.start().result()
 
     #NotePitch
     for i in CFG.MELODY_PITCH_RANGE:
         jid1 = "np_" + str(i) + CFG.XMPP_SERVER
         passwd1 = "."
         a1 = Setup_NotePitches(jid1, passwd1)
-        a1.start()
+        a1.start().result()
 
     while True:
         try:

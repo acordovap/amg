@@ -1,6 +1,7 @@
 import config as CFG
 import asyncio
 import aioxmpp
+from spade import quit_spade
 from aioxmpp import PresenceState, PresenceShow
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
@@ -19,6 +20,7 @@ from mingus.midi import midi_file_out
 S_RECEIVE_CHORD = "S_RECEIVE_CHORD"
 S_RECEIVE_NOTE  = "S_RECEIVE_NOTE"
 S_PUBLISH_SONG  = "S_PUBLISH_SONG"
+S_FINISHED      = "S_FINISHED"
 
 class SongAgent(Agent):
     async def setup(self):
@@ -27,11 +29,14 @@ class SongAgent(Agent):
         fsm.add_state(name=S_RECEIVE_CHORD, state=SReceiveChordState(), initial=True)
         fsm.add_state(name=S_RECEIVE_NOTE, state=SReceiveNoteState())
         fsm.add_state(name=S_PUBLISH_SONG, state=SPublishSongState())
+        fsm.add_state(name=S_FINISHED, state=SFinishedState())
         fsm.add_transition(source=S_RECEIVE_CHORD, dest=S_RECEIVE_CHORD)
         fsm.add_transition(source=S_RECEIVE_CHORD, dest=S_RECEIVE_NOTE)
         fsm.add_transition(source=S_RECEIVE_CHORD, dest=S_PUBLISH_SONG)
         fsm.add_transition(source=S_RECEIVE_NOTE, dest=S_RECEIVE_NOTE)
         fsm.add_transition(source=S_RECEIVE_NOTE, dest=S_RECEIVE_CHORD)
+        fsm.add_transition(source=S_PUBLISH_SONG, dest=S_FINISHED)
+        fsm.add_transition(source=S_FINISHED, dest=S_FINISHED)
         chords_template = Template()
         notes_template = Template()
         chords_template.set_metadata("performative", "chords")
@@ -98,6 +103,7 @@ class SReceiveNoteState(State):
                             self.agent.set("melody_track", mt)
                             self.agent.set("current_melody_bar", Bar(CFG.SONG_KEY_SIGNATURE, CFG.SONG_TIME_SIGNATURE))
                             self.agent.set("current_bar_no", cbn+1)
+                            print("{}: {}/{}".format(self.agent.name, cbn+1, CFG.SONG_LENGTH)) # falta sacar con modulo, de momento es un acorde por barra
                             self.set_next_state(S_RECEIVE_CHORD)
                         else:
                             self.agent.set("current_melody_bar", cmb)
@@ -118,14 +124,28 @@ class SPublishSongState(State):
         self.agent.presence.set_presence(status="")
 
     async def run(self):
+        while await self.receive(): # flush messages
+            pass
+
         c = Composition()
-        c.set_author('amg')
-        c.set_title('Composition')
+        c.set_author("amg")
+        c.set_title("Composition " + self.agent.name)
         c.add_track(self.agent.get("melody_track"))
         c.add_track(self.agent.get("accompaniment_track"))
         # fluidsynth.init("4U-Yamaha C5 Grand-v1.5.sf2", "alsa")
         # fluidsynth.play_Composition(c)
-        midi_file_out.write_Composition("amg_composition.mid", c, CFG.SONG_TEMPO)
+        midi_file_out.write_Composition("amg_composition_"+self.agent.name+".mid", c, CFG.SONG_TEMPO)
         l = lilypond.from_Composition(c)
         # print(l)
-        lilypond.to_pdf(l, "amg_composition")
+        lilypond.to_pdf(l, "amg_composition_"+self.agent.name)
+        self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.AWAY))
+        self.set_next_state(S_FINISHED)
+
+class SFinishedState(State):
+    async def on_start(self):
+        self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.AWAY))
+
+    async def run(self):
+        while await self.receive(): # flush messages
+            pass
+        self.set_next_state(S_FINISHED)

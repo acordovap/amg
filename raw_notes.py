@@ -33,7 +33,7 @@ class RawNote(Agent):
             for i in range(CFG.no_songs):
                 cntct = contacts[aioxmpp.JID.fromstr("s_" + str(i) + CFG.XMPP_SERVER)]["presence"]
                 if cntct.show == PresenceShow.CHAT and cntct.status.any() == "notes":
-                #if contacts[aioxmpp.JID.fromstr("s_" + str(i) + CFG.XMPP_SERVER)]["presence"].show == PresenceShow.NONE:
+                    self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.CHAT))
                     fn = self.agent.get("full_note")
                     if fn[1] != None and fn[2] != None:
                         msg = Message(to="s_" + str(i) + CFG.XMPP_SERVER)   # Instantiate the message
@@ -42,6 +42,8 @@ class RawNote(Agent):
                         await self.send(msg)
                         # se podría implementar un fllush de la nota, se tendría que o salir del for o enviar a todas las songs
                         await asyncio.sleep(random.randint(1, 10)/1000)
+                # else: # set status chat
+                #     self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.DND))
 
     async def setup(self):
         # print("<RawNote> {}".format(str(self.jid).split("@")[0]))

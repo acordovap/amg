@@ -18,7 +18,7 @@ class NotePitch(Agent):
         async def run(self):
             contacts = self.presence.get_contacts()
             for i in CFG.all_notes:
-                if contacts[aioxmpp.JID.fromstr("n_" + i.lower() + CFG.XMPP_SERVER)]["presence"].show == PresenceShow.NONE:
+                if contacts[aioxmpp.JID.fromstr("n_" + i.lower() + CFG.XMPP_SERVER)]["presence"].show == PresenceShow.CHAT:
                     msg = Message(to="n_" + i.lower() + CFG.XMPP_SERVER)     # Instantiate the message
                     msg.set_metadata("performative", "notepitch")  # Set the "notes" FIPA performative
                     msg.body = self.agent.name.split("_")[1]                    # Set the message content

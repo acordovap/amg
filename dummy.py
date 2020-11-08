@@ -1,7 +1,7 @@
 import config as CFG
 import time
+from aioxmpp import PresenceState, PresenceShow
 from spade import quit_spade
-# from notes import *
 from songs import *
 from chords import *
 from note_values import *
@@ -11,11 +11,12 @@ from raw_notes import *
 if __name__ == "__main__":
 
     # init songs
+    s = []
     for i in range(CFG.no_songs):
         jid1 = "s_" + str(i) + CFG.XMPP_SERVER
         passwd1 = "."
-        a1 = SongAgent(jid1, passwd1)
-        a1.start().result()
+        s.append(SongAgent(jid1, passwd1) )
+        s[i].start().result()
 
     # init chords
     for i in list(set(CFG.PROGRESSIONS)):
@@ -45,9 +46,14 @@ if __name__ == "__main__":
         a1 = NotePitch(jid1, passwd1)
         a1.start()
 
-    while True:
+    keepgoing = True
+    while keepgoing:
         try:
+            keepgoing = not all(i.presence.state.show == PresenceShow.AWAY for i in s) 
             time.sleep(1)
+            # for i in s:
+            #     if i.presence.state.show != PresenceShow.AWAY:
+
         except KeyboardInterrupt:
             quit_spade()
             break
