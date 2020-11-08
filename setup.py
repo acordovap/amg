@@ -48,7 +48,6 @@ if __name__ == "__main__":
         passwd1 = "."
         a1 = Setup_NoteValues(jid1, passwd1)
         a1.start()
-        a1.web.start(hostname="127.0.0.1", port="100" + str(i).zfill(2))
 
     while True:
         try:
