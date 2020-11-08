@@ -5,9 +5,14 @@ from notes import *
 from songs import *
 from chords import *
 from note_values import *
+from note_pitches import *
 from raw_notes import *
 
 if __name__ == "__main__":
+
+    # init songs
+
+    # init chords
 
     # init notes
     for i in CFG.all_notes:
@@ -23,7 +28,12 @@ if __name__ == "__main__":
         a1 = NoteValue(jid1, passwd1)
         a1.start()
 
-
+    # init note all_note_pitches
+    for i in CFG.MELODY_PITCH_RANGE:
+        jid1 = "np_" + str(i) + CFG.XMPP_SERVER
+        passwd1 = "."
+        a1 = NotePitch(jid1, passwd1)
+        a1.start()
 
     while True:
         try:
