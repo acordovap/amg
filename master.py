@@ -1,5 +1,6 @@
 import config as CFG
 import time
+from spade import quit_spade
 from notes import *
 from songs import *
 from chords import *
