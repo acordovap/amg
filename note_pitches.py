@@ -11,7 +11,7 @@ from spade.message import Message
 
 class NotePitch(Agent):
     async def setup(self):
-        print("<NotePitch> {}".format(str(self.jid).split("@")[0]))
+        # print("<NotePitch> {}".format(str(self.jid).split("@")[0]))
         self.add_behaviour(self.sendNotePitch())
 
     class sendNotePitch(CyclicBehaviour):

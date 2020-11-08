@@ -1,5 +1,7 @@
 import config as CFG
 import asyncio
+import aioxmpp
+from aioxmpp import PresenceState, PresenceShow
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 from spade.behaviour import FSMBehaviour, State
@@ -10,7 +12,7 @@ from mingus.containers import NoteContainer
 from mingus.containers import Bar
 from mingus.containers import Track
 from mingus.containers import Composition
-#from mingus.midi import fluidsynth
+from mingus.midi import fluidsynth
 from mingus.extra import lilypond
 from mingus.midi import midi_file_out
 
@@ -20,6 +22,7 @@ S_PUBLISH_SONG  = "S_PUBLISH_SONG"
 
 class SongAgent(Agent):
     async def setup(self):
+        # print("<SongAgent> {}".format(str(self.jid).split("@")[0]))
         fsm = SongBehaviour()
         fsm.add_state(name=S_RECEIVE_CHORD, state=SReceiveChordState(), initial=True)
         fsm.add_state(name=S_RECEIVE_NOTE, state=SReceiveNoteState())
@@ -48,6 +51,10 @@ class SongBehaviour(FSMBehaviour):
         self.agent.set("current_accompaniment_bar", Bar(CFG.SONG_KEY_SIGNATURE, CFG.SONG_TIME_SIGNATURE))
 
 class SReceiveChordState(State):
+    async def on_start(self):
+        self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.CHAT))
+        self.agent.presence.set_presence(status="chords")
+
     async def run(self):
         cbn = self.agent.get("current_bar_no")
         if cbn < CFG.SONG_LENGTH: # falta sacar con modulo, de momento es un acorde por barra
@@ -55,7 +62,6 @@ class SReceiveChordState(State):
             if msg:
                 if self.agent.get("chords_template").match(msg):
                     if chords.determine_triad(getattr(chords, CFG.PROGRESSIONS[cbn])(CFG.SONG_KEY_SIGNATURE), True) == chords.determine_triad(msg.body.split(','), True):
-                        print("received: " + msg.body)
                         cab = self.agent.get("current_accompaniment_bar")
                         cab.place_notes(msg.body.split(','), 1) # de momento es un acorde por barra
                         at = self.agent.get("accompaniment_track")
@@ -65,31 +71,39 @@ class SReceiveChordState(State):
                         self.set_next_state(S_RECEIVE_NOTE)
                     else:
                         self.set_next_state(S_RECEIVE_CHORD) # Continúa en el mismo estado
+                else:
+                    self.set_next_state(S_RECEIVE_CHORD) # Continúa en el mismo estado
             else:
                 self.set_next_state(S_RECEIVE_CHORD) # Continúa en el mismo estado
         else:
             self.set_next_state(S_PUBLISH_SONG)
 
 class SReceiveNoteState(State):
+    async def on_start(self):
+        self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.CHAT))
+        self.agent.presence.set_presence(status="notes")
+
     async def run(self):
         cbn = self.agent.get("current_bar_no")
         msg = await self.receive()
         if msg:
             if self.agent.get("notes_template").match(msg):
-                if Note(msg.body).name in getattr(chords, CFG.PROGRESSIONS[cbn])(CFG.SONG_KEY_SIGNATURE):
+                if Note(msg.body.split(",")[0]).name in getattr(chords, CFG.PROGRESSIONS[cbn])(CFG.SONG_KEY_SIGNATURE):
                     cmb = self.agent.get("current_melody_bar")
-                    # checar si va a caber con el tamaño, puede ser en el if de arriba?
-                    cmb.place_notes(msg.body, 4) # de momento 4 notas por barra
-                    if cmb.current_beat == cmb.length: # chechar si llena, entonces agregar a melody_track
-                        mt = self.agent.get("melody_track")
-                        mt.add_bar(cmb)
-                        self.agent.set("melody_track", mt)
-                        self.agent.set("current_melody_bar", Bar(CFG.SONG_KEY_SIGNATURE, CFG.SONG_TIME_SIGNATURE))
-                        self.agent.set("current_bar_no", cbn+1)
-                        self.set_next_state(S_RECEIVE_CHORD)
+                    if cmb.current_beat + 1/float(msg.body.split(",")[1]) <= cmb.length:
+                        cmb.place_notes(msg.body.split(",")[0], int(msg.body.split(",")[1])) # de momento 4 notas por barra
+                        if cmb.current_beat == cmb.length: # chechar si llena, entonces agregar a melody_track
+                            mt = self.agent.get("melody_track")
+                            mt.add_bar(cmb)
+                            self.agent.set("melody_track", mt)
+                            self.agent.set("current_melody_bar", Bar(CFG.SONG_KEY_SIGNATURE, CFG.SONG_TIME_SIGNATURE))
+                            self.agent.set("current_bar_no", cbn+1)
+                            self.set_next_state(S_RECEIVE_CHORD)
+                        else:
+                            self.agent.set("current_melody_bar", cmb)
+                            self.set_next_state(S_RECEIVE_NOTE)
                     else:
-                        self.agent.set("current_melody_bar", cmb)
-                        self.set_next_state(S_RECEIVE_NOTE)
+                        self.set_next_state(S_RECEIVE_NOTE) # Continúa en el mismo estado
                 else:
                     self.set_next_state(S_RECEIVE_NOTE) # Continúa en el mismo estado
             else:
@@ -99,6 +113,10 @@ class SReceiveNoteState(State):
 
 
 class SPublishSongState(State):
+    async def on_start(self):
+        self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.DND))
+        self.agent.presence.set_presence(status="")
+
     async def run(self):
         c = Composition()
         c.set_author('amg')

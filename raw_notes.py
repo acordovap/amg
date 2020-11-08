@@ -2,6 +2,7 @@ import config as CFG
 import time
 import asyncio
 import random
+import aioxmpp
 from aioxmpp import PresenceState, PresenceShow
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
@@ -28,17 +29,22 @@ class RawNote(Agent):
 
     class sendFullNote(CyclicBehaviour):
         async def run(self):
-            #falta poner que este disponible los agente song
-            fn = self.agent.get("full_note")
-            if fn[1] != None and fn[2] != None:
-                msg = Message(to="receiver"+CFG.XMPP_SERVER)   # Instantiate the message
-                msg.set_metadata("performative", "notes")   # Set the "notes" FIPA performative
-                msg.body = fn[0]+"-"+str(fn[1])+","+str(fn[2])   # Set the message content
-                #await self.send(msg)
-                await asyncio.sleep(random.randint(1, 10)/1000)
+            contacts = self.presence.get_contacts()
+            for i in range(CFG.no_songs):
+                cntct = contacts[aioxmpp.JID.fromstr("s_" + str(i) + CFG.XMPP_SERVER)]["presence"]
+                if cntct.show == PresenceShow.CHAT and cntct.status.any() == "notes":
+                #if contacts[aioxmpp.JID.fromstr("s_" + str(i) + CFG.XMPP_SERVER)]["presence"].show == PresenceShow.NONE:
+                    fn = self.agent.get("full_note")
+                    if fn[1] != None and fn[2] != None:
+                        msg = Message(to="s_" + str(i) + CFG.XMPP_SERVER)   # Instantiate the message
+                        msg.set_metadata("performative", "notes")   # Set the "notes" FIPA performative
+                        msg.body = fn[0]+"-"+str(fn[1])+","+str(fn[2])   # Set the message content
+                        await self.send(msg)
+                        # se podría implementar un fllush de la nota, se tendría que o salir del for o enviar a todas las songs
+                        await asyncio.sleep(random.randint(1, 10)/1000)
 
     async def setup(self):
-        print("<RawNote> {}".format(str(self.jid).split("@")[0]))
+        # print("<RawNote> {}".format(str(self.jid).split("@")[0]))
         self.set("full_note", [self.name.split("_")[1].capitalize(), None, None])
         notevalues_template = Template()
         notepitch_template = Template()

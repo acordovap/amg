@@ -11,7 +11,7 @@ from spade.message import Message
 
 class NoteValue(Agent):
     async def setup(self):
-        print("<NoteValue> {}".format(str(self.jid).split("@")[0]))
+        # print("<NoteValue> {}".format(str(self.jid).split("@")[0]))
         self.add_behaviour(self.sendNoteValue())
 
     class sendNoteValue(CyclicBehaviour):
