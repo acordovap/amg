@@ -5,7 +5,7 @@ from songs import *
 from chords import *
 
 if __name__ == "__main__":
-    receiveragent = SongAgent("receiver"+CFG.XMPP_SERVER, "receiver_password")
+    receiveragent = SongAgent("receiver"+CFG.XMPP_SERVER, ".")
     future = receiveragent.start()
     future.result() # wait for receiver agent to be prepared.
 
