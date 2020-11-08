@@ -14,7 +14,7 @@ class Note_C5(Agent):
             msg.set_metadata("performative", "notes")  # Set the "notes" FIPA performative
             msg.body = "C-5"                    # Set the message content
             await self.send(msg)
-            await asyncio.sleep(random.randint(1, 3))
+            await asyncio.sleep(random.randint(1, 10)/1000)
 
     async def setup(self):
         b = self.sendNote()
@@ -27,7 +27,7 @@ class Note_D5(Agent):
             msg.set_metadata("performative", "notes")  # Set the "notes" FIPA performative
             msg.body = "D-5"                    # Set the message content
             await self.send(msg)
-            await asyncio.sleep(random.randint(1, 3))
+            await asyncio.sleep(random.randint(1, 10)/1000)
 
     async def setup(self):
         b = self.sendNote()
@@ -40,7 +40,7 @@ class Note_E5(Agent):
             msg.set_metadata("performative", "notes")  # Set the "notes" FIPA performative
             msg.body = "E-5"                    # Set the message content
             await self.send(msg)
-            await asyncio.sleep(random.randint(1, 3))
+            await asyncio.sleep(random.randint(1, 10)/1000)
 
     async def setup(self):
         b = self.sendNote()
@@ -53,7 +53,7 @@ class Note_F5(Agent):
             msg.set_metadata("performative", "notes")  # Set the "notes" FIPA performative
             msg.body = "F-5"                    # Set the message content
             await self.send(msg)
-            await asyncio.sleep(random.randint(1, 3))
+            await asyncio.sleep(random.randint(1, 10)/1000)
 
     async def setup(self):
         b = self.sendNote()
@@ -66,7 +66,7 @@ class Note_G5(Agent):
             msg.set_metadata("performative", "notes")  # Set the "notes" FIPA performative
             msg.body = "G-5"                    # Set the message content
             await self.send(msg)
-            await asyncio.sleep(random.randint(1, 3))
+            await asyncio.sleep(random.randint(1, 10)/1000)
 
     async def setup(self):
         b = self.sendNote()
@@ -79,7 +79,7 @@ class Note_A5(Agent):
             msg.set_metadata("performative", "notes")  # Set the "notes" FIPA performative
             msg.body = "A-5"                    # Set the message content
             await self.send(msg)
-            await asyncio.sleep(random.randint(1, 3))
+            await asyncio.sleep(random.randint(1, 10)/1000)
 
     async def setup(self):
         b = self.sendNote()
@@ -92,7 +92,7 @@ class Note_B5(Agent):
             msg.set_metadata("performative", "notes")  # Set the "notes" FIPA performative
             msg.body = "B-5"                    # Set the message content
             await self.send(msg)
-            await asyncio.sleep(random.randint(1, 3))
+            await asyncio.sleep(random.randint(1, 10)/1000)
 
     async def setup(self):
         b = self.sendNote()
