@@ -5,7 +5,7 @@ OUTPUT_FOLDER = "./out/"
 
 # Init parameters
 SONG_LENGTH = 6
-SONG_KEY_SIGNATURE = "Ab"
+SONG_KEY_SIGNATURE = "C"
 SONG_TIME_SIGNATURE = (4, 4)
 SONG_TEMPO = 120
 PROGRESSIONS = ["I", "V", "I", "I", "V", "I"]
@@ -17,4 +17,4 @@ all_keys = ['Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#
 all_chords = ['I', 'I7', 'II', 'II7', 'III', 'III7', 'IV', 'IV7', 'V', 'V7', 'VI', 'VI7', 'VII', 'VII7']
 inversions = ['first', 'second', 'third']
 all_note_values = [1, 2, 4, 8]
-no_songs = 1
+no_songs = 4

@@ -27,11 +27,11 @@ if __name__ == "__main__":
         a1.start().result()
 
     # init inversions
-    # for i in CFG.inversions:
-    #     jid1 = "i_" + str(i) + CFG.XMPP_SERVER
-    #     passwd1 = "."
-    #     a1 = Inversion(jid1, passwd1)
-    #     a1.start()
+    for i in CFG.inversions:
+        jid1 = "i_" + str(i) + CFG.XMPP_SERVER
+        passwd1 = "."
+        a1 = Inversion(jid1, passwd1)
+        a1.start()
 
     # init notes
     for i in CFG.all_notes: # poner solo notas de la escala
