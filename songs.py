@@ -129,15 +129,15 @@ class SPublishSongState(State):
 
         c = Composition()
         c.set_author("amg")
-        c.set_title("Composition " + self.agent.name)
+        c.set_title(CFG.OUTPUT_PREFIX + self.agent.name)
         c.add_track(self.agent.get("melody_track"))
         c.add_track(self.agent.get("accompaniment_track"))
         # fluidsynth.init("4U-Yamaha C5 Grand-v1.5.sf2", "alsa")
         # fluidsynth.play_Composition(c)
-        midi_file_out.write_Composition("amg_composition_"+self.agent.name+".mid", c, CFG.SONG_TEMPO)
+        midi_file_out.write_Composition(CFG.OUTPUT_FOLDER+CFG.OUTPUT_PREFIX+self.agent.name+".mid", c, CFG.SONG_TEMPO)
         l = lilypond.from_Composition(c)
         # print(l)
-        lilypond.to_pdf(l, "amg_composition_"+self.agent.name)
+        lilypond.to_pdf(l, CFG.OUTPUT_FOLDER+CFG.OUTPUT_PREFIX+self.agent.name)
         self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.AWAY))
         self.set_next_state(S_FINISHED)
 
