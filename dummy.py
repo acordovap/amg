@@ -4,6 +4,7 @@ from aioxmpp import PresenceState, PresenceShow
 from spade import quit_spade
 from songs import *
 from chords import *
+from inversions import *
 from note_values import *
 from note_pitches import *
 from raw_notes import *
@@ -23,7 +24,14 @@ if __name__ == "__main__":
         jid1 = "c_" + CFG.SONG_KEY_SIGNATURE.lower() + "_" + str(i).lower() + CFG.XMPP_SERVER
         passwd1 = "."
         a1 = Chord(jid1, passwd1)
-        a1.start()
+        a1.start().result()
+
+    # init inversions
+    # for i in CFG.inversions:
+    #     jid1 = "i_" + str(i) + CFG.XMPP_SERVER
+    #     passwd1 = "."
+    #     a1 = Inversion(jid1, passwd1)
+    #     a1.start()
 
     # init notes
     for i in CFG.all_notes: # poner solo notas de la escala
@@ -49,7 +57,7 @@ if __name__ == "__main__":
     keepgoing = True
     while keepgoing:
         try:
-            keepgoing = not all(i.presence.state.show == PresenceShow.AWAY for i in s) 
+            keepgoing = not all(i.presence.state.show == PresenceShow.AWAY for i in s)
             time.sleep(1)
             # for i in s:
             #     if i.presence.state.show != PresenceShow.AWAY:

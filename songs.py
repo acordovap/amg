@@ -136,8 +136,10 @@ class SPublishSongState(State):
         # fluidsynth.play_Composition(c)
         midi_file_out.write_Composition(CFG.OUTPUT_FOLDER+CFG.OUTPUT_PREFIX+self.agent.name+".mid", c, CFG.SONG_TEMPO)
         l = lilypond.from_Composition(c)
-        # print(l)
-        lilypond.to_pdf(l, CFG.OUTPUT_FOLDER+CFG.OUTPUT_PREFIX+self.agent.name)
+        extra = "  \\score { \\new PianoStaff << \\set PianoStaff.instrumentName = #\"Piano  \" \\new Staff = \"upper\" \\upper \\new Staff = \"lower\" \\lower  >> \\layout { }  }"
+        l2 = l.replace("{ {", "upper = {x {x", 1).replace("{ {", "lower = { {", 1).replace("{x {x", "{ {", 1)+extra
+        # print("<lilipond-"+CFG.OUTPUT_FOLDER+CFG.OUTPUT_PREFIX+self.agent.name+">\n"+l2)
+        lilypond.to_pdf(l2, CFG.OUTPUT_FOLDER+CFG.OUTPUT_PREFIX+self.agent.name)
         self.agent.presence.set_presence(state=PresenceState(available=True, show=PresenceShow.AWAY))
         self.set_next_state(S_FINISHED)
 
